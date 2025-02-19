@@ -1,0 +1,11 @@
+<% content_for :title, "New forecast" %>
+
+<h1>New forecast</h1>
+
+<%= render "form", forecast: @forecast %>
+
+<br>
+
+<div>
+  <%= link_to "Back to forecasts", forecasts_path %>
+</div>
