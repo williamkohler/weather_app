@@ -23,4 +23,22 @@ class Forecast < ApplicationRecord
       { error: "Failed to fetch forecast", status: response.code }
     end
   end
+
+  def self.seven_day_forecast(address)
+    data = []
+    coordinates = get_coordinates(address)
+    res = get_forecast(coordinates.first, coordinates.last)
+    res = res["daily"]
+    (0..6).each do |index|
+      day = {}
+      day[:max] = res["temperature_2m_max"][index]
+      day[:min] = res["temperature_2m_min"][index]
+      day[:sunrise] = res["sunrise"][index]
+      day[:sunset] = res["sunset"][index]
+      day[:precip_sum] = res["precipitation_sum"][index]
+      day[:precip_sum] = res["precipitation_probability_max"][index]
+      data << day
+    end
+    data
+  end
 end
