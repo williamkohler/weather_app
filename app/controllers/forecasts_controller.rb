@@ -13,6 +13,7 @@ class ForecastsController < ApplicationController
   # GET /forecasts/new
   def new
     @forecast = Forecast.new
+    binding.pry
   end
 
   # GET /forecasts/1/edit

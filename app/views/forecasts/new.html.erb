@@ -2,7 +2,14 @@
 
 <h1>New forecast</h1>
 
-<%= render "form", forecast: @forecast %>
+<%= form_with(model: @forecast, local: true) do |form| %>
+  <%= form.label :address %>
+  <%= form.text_field :address %>
+
+  <%= form.submit "Create Forecast" %>
+<% end %>
+
+
 
 <br>
 
