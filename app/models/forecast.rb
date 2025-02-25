@@ -4,19 +4,8 @@ require "json"
 
 class Forecast < ApplicationRecord
   validates :address, presence: true
-  # attr_accessor :latitude, :longitude, :address
-  after_create :set_coordinates
-
-
-
-  def self.get_coordinates(address)
-    results = Geocoder.search address
-    if results.any?
-      results.first.coordinates # => [latitude, longitude]
-    else
-      [ nil, nil ]
-    end
-  end
+  attr_accessor :from_api
+  after_create :set_coordinates, :get_forecast_from_api
 
   def set_coordinates
     results = Geocoder.search address
@@ -27,13 +16,13 @@ class Forecast < ApplicationRecord
     end
   end
 
-  # def self.get_forecast_from_api(latitude, longitude)
   def get_forecast_from_api
     url = URI("https://api.open-meteo.com/v1/forecast?latitude=#{latitude}&longitude=#{longitude}&hourly=temperature_2m&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch")
 
     response = Net::HTTP.get_response(url)
 
     if response.is_a?(Net::HTTPSuccess)
+      @from_api = true
       JSON.parse(response.body)
     else
       { error: "Failed to fetch forecast", status: response.code }
@@ -43,28 +32,23 @@ class Forecast < ApplicationRecord
 
   # Fetches the seven-day forecast for a given address.
   # If cached data is less than 30 minutes old, return it; otherwise, fetch new data.
-  def self.seven_day_forecast(address)
-    address = address.strip # TODO: add normalization
-    last_updated = last_cache_update(address)
-
-    if last_updated.present? && last_updated > 30.minutes.ago
-      # Cache is still valid, return cached data
+  def seven_day_forecast
+    if cached?
       Rails.logger.info "Returning cached forecast data for #{address}"
-      cached_forecast(address)
+      @from_api = false
+      cached_forecast
     else
-      # Cache is expired or missing, fetch new data and store it
       Rails.logger.info "Fetching new forecast data for #{address}"
-      fetch_and_cache_seven_day_forecast(address)
+      @from_api = true
+      fetch_and_cache_forecast
     end
   end
 
-  def self.fetch_and_cache_seven_day_forecast(address)
-    cache_key = "forecast:#{address.parameterize}"  # Cache key based on the address
+  def fetch_and_cache_forecast
     timestamp_key = "#{cache_key}:timestamp"
 
     Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
-      coordinates = get_coordinates(address)
-      res = get_forecast_from_api(coordinates.first, coordinates.last)
+      res = get_forecast_from_api
 
       data = []
       if res["daily"]
@@ -88,12 +72,19 @@ class Forecast < ApplicationRecord
     end
   end
 
-  def self.last_cache_update(address)
-    where(address: address).order(updated_at: :desc).limit(1).pluck(:updated_at).first
+  def last_cache_update
+    self.class.where(address: address).order(updated_at: :desc).limit(1).pluck(:updated_at).first
   end
 
-  def self.cached_forecast(address)
-    forecast_data = where(address: address).order(updated_at: :desc).limit(1).pluck(:data).first
-    forecast_data.present? ? eval(forecast_data) : nil
+  def cached_forecast
+    Rails.cache.fetch(cache_key)
+  end
+
+  def cached?
+    Rails.cache.exist?(cache_key)
+  end
+
+  def cache_key
+    "forecast:#{address.parameterize}"
   end
 end

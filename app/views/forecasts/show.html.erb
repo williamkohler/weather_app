@@ -1,9 +1,42 @@
-<p style="color: green"><%= notice %></p>
+<h1>Forecast for <%= @forecast.address %></h1>
 
-<%= render @forecast %>
+<p>
+  <strong>Data Source:</strong> 
+  <% if @forecast.from_api %>
+    <span style="color: red;">Retrieved from API</span>
+  <% else %>
+    <span style="color: green;">Cached Data</span>
+  <% end %>
+</p>
 
-<div>
-  <%= link_to "Back to forecasts", forecasts_path %>
+  <table>
+    <thead>
+      <tr>
+        <th>Day</th>
+        <th>Max Temp (°F)</th>
+        <th>Min Temp (°F)</th>
+        <th>Sunrise</th>
+        <th>Sunset</th>
+        <th>Precipitation (in)</th>
+        <th>Precipitation Probability (%)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @forecast.seven_day_forecast.each_with_index do |day, index| %>
+        <tr>
+          <td>Day <%= index + 1 %></td>
+          <td><%= day[:max] %></td>
+          <td><%= day[:min] %></td>
+          <td><%= day[:sunrise] %></td>
+          <td><%= day[:sunset] %></td>
+          <td><%= day[:precip_sum] %></td>
+          <td><%= day[:precip_prob] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
 
-  <%= button_to "Delete this forecast", @forecast, method: :delete %>
-</div>
+<%= link_to 'Back', forecasts_path %>
+<%= form_with model: @forecast, method: :delete, class: "inline-form" do %>
+  <%= submit_tag "Delete", data: { confirm: "Are you sure?" }, class: "btn btn-danger" %>
+<% end %>

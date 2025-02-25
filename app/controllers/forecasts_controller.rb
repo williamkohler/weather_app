@@ -8,6 +8,7 @@ class ForecastsController < ApplicationController
 
   # GET /forecasts/1 or /forecasts/1.json
   def show
+    @forecast.seven_day_forecast
   end
 
   # GET /forecasts/new
