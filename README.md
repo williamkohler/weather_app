@@ -107,7 +107,8 @@ rails test
 
 ## Additional Information
 
-For additional help or feedback, you can contact [Your Contact Information].
+For additional help or feedback, you can contact Bill Kohler .
+bkohler4 [at] gmail [dot] com
 
 ---
 
