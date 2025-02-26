@@ -109,7 +109,3 @@ rails test
 
 For additional help or feedback, you can contact Bill Kohler .
 bkohler4 [at] gmail [dot] com
-
----
-
-This Markdown formatted README file should be saved as `README.md` in the root directory of your weather forecast app project to provide detailed information on GitHub or any other platform hosting the repository.
