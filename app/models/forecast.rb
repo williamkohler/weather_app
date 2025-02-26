@@ -12,6 +12,7 @@ class Forecast < ApplicationRecord
     if results.any?
       self.latitude = results.first.data["lat"]
       self.longitude = results.first.data["lon"]
+      self.address = results.first.display_name # format and normalize the address imput
       save!
     end
   end

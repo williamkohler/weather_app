@@ -24,11 +24,11 @@
     <tbody>
       <% @forecast.seven_day_forecast.each_with_index do |day, index| %>
         <tr>
-          <td>Day <%= index + 1 %></td>
+          <td><%= Time.parse(day[:sunrise]).strftime("%a, %b %-d, %Y") %></td>
           <td><%= day[:max] %></td>
           <td><%= day[:min] %></td>
-          <td><%= day[:sunrise] %></td>
-          <td><%= day[:sunset] %></td>
+          <td><%= Time.parse(day[:sunrise]).strftime("%I:%M %p") %></td>
+          <td><%= Time.parse(day[:sunset]).strftime("%I:%M %p") %></td>
           <td><%= day[:precip_sum] %></td>
           <td><%= day[:precip_prob] %></td>
         </tr>
